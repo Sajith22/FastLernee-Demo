@@ -2,93 +2,55 @@ import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
-function BrandMark() {
-  return (
-    <div className="brand-mark" aria-label="FastLearnee">
-      <span>FastLearnee</span>
-      <small>GRADE A+</small>
-    </div>
-  );
+const modules = [
+  { code: 'CS201', name: 'Algorithms & Complexity', progress: 84, active: '2 hours ago' },
+  { code: 'MATH301', name: 'Linear Algebra & Statistics', progress: 62, active: 'Yesterday' },
+  { code: 'BIO105', name: 'Molecular Physiology', progress: 95, active: '3 days ago' },
+];
+
+function Brand() { return <span className="brand">FastLearnee <b>PRO</b></span>; }
+function Button({ children, kind = 'primary', onClick, className = '' }) { return <button className={`button ${kind} ${className}`} onClick={onClick}>{children}</button>; }
+function Badge({ children, tone = 'green' }) { return <span className={`badge ${tone}`}>{children}</span>; }
+function Ring({ value, red = false }) { return <span className={`ring ${red ? 'red' : ''}`}><b>{value}%</b></span>; }
+
+function Header({ setScreen, admin = false }) {
+  return <header className="topbar">
+    <button className="brand-button" onClick={() => setScreen('dashboard')}><Brand /></button>
+    <span className="divider" />
+    <button className="uni-select">Oxford University⌄</button>
+    <div className="search">⌕ <span>Search modules, past papers, notes...</span></div>
+    <span className="term">▣ &nbsp; MT Term 2026</span>
+    <span className="avatar">EW</span><b className="user-name">Emma Wilson</b>
+    {admin && <Badge tone="dark">ADMIN</Badge>}
+  </header>;
 }
+function Page({ children, screen, setScreen, admin = false }) { return <><Header setScreen={setScreen} admin={admin} /><main className="page">{children}</main><nav className="screen-nav" aria-label="Demo screens">
+  {['dashboard', 'quiz', 'exam', 'evaluation', 'diagnostics', 'revision', 'admin', 'materials'].map((item) => <button key={item} className={screen === item ? 'selected' : ''} onClick={() => setScreen(item)}>{item}</button>)}
+</nav></>; }
+function Title({ children, subtitle, action }) { return <div className="title-row"><div><h1>{children}</h1>{subtitle && <p>{subtitle}</p>}</div>{action}</div>; }
 
-function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('student@oxford.ac.uk');
-  const [password, setPassword] = useState('exam-ready-password');
-  const [submitted, setSubmitted] = useState(false);
+function Dashboard({ setScreen }) { return <Page screen="dashboard" setScreen={setScreen}>
+  <Title subtitle="Your custom study templates are synched with the latest board blueprints." action={<span className="pill">Syllabus Coverage: 78% Completed</span>}>Continue where you left off</Title>
+  <div className="module-grid">{modules.map((module) => <article className="module-card" key={module.code}><div><small>{module.code}</small><h2>{module.name}</h2></div><Ring value={module.progress} /><hr /><p>Last active: {module.active}</p><div className="card-actions"><Button onClick={() => setScreen('quiz')}>Generate Quiz</Button><Button kind="outline" onClick={() => setScreen('revision')}>Revision Sheet</Button></div></article>)}</div>
+  <p className="section-label">IN-PROGRESS EXAMINATION</p><article className="exam-resume lined"><div><h2>CS201: Mock Midterm Exam <Badge tone="yellow">Adaptive Testing</Badge></h2><p>Dissected from last term's computer science board papers. Timer remains at 18:40. Real syllabus weighting rules are applied.</p><div className="progress"><span style={{ width: '56%' }} /></div><Button onClick={() => setScreen('exam')}>Resume Quiz Attempt</Button> <Button kind="outline">Discard Attempt</Button></div><b>14 / 25 Questions Completed</b></article>
+  <p className="section-label">RECENTLY GRADED SHEETS</p><div className="graded-grid">{['Dynamic Programming Drill #4', 'Complex Matrices & Eigenvectors', 'Synaptic Transmission Mastery'].map((name, index) => <article className="graded-card" key={name}><small>Submitted Aug {28 - index * 3}</small><h3>{name}</h3><b>View correction sheet →</b><Ring value={[9, 8, 10][index]} red /></article>)}</div>
+ </Page>; }
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    setSubmitted(true);
-  }
+function Quiz({ setScreen }) { const [topics, setTopics] = useState([0, 1, 3]); return <Page screen="quiz" setScreen={setScreen}>
+  <Title subtitle="Configure your criteria below to generate highly adaptive testing aligned with your syllabus structure." action={<span className="pill">Adaptive Prep Standard: MT Term 2026</span>}>Generate Custom Exam Quiz</Title>
+  <section className="paper-panel quiz-panel"><div className="form-heading"><div><small>MODULE TARGET SELECTION</small><h2>CS201: Algorithms &amp; Complexity</h2></div><Button kind="outline">Change Module⌄</Button></div><hr /><small>SELECT SYLLABUS TOPICS</small><div className="topic-grid">{['Dynamic Programming Drill', 'Graph Traversals (DFS/BFS)', 'NP-Completeness Proofs', 'Asymptotic Complexity Bounds', 'Greedy Interval Scheduling', 'Divide and Conquer Masters Theory'].map((topic, index) => <button className={topics.includes(index) ? 'topic checked' : 'topic'} onClick={() => setTopics(topics.includes(index) ? topics.filter((item) => item !== index) : [...topics, index])} key={topic}>{topics.includes(index) ? '☑' : '□'} {topic}</button>)}</div><hr /><div className="settings-row"><div><small>QUESTION COUNT</small><div className="choice-row">{[10, 15, 20, 25].map((count) => <button className={count === 15 ? 'choice active' : 'choice'} key={count}>{count}</button>)}</div></div><div><small>DIFFICULTY MIX (%)</small><div className="difficulty"><span>● &nbsp; Easy: &nbsp; <b>30%</b></span><span>● &nbsp; Medium: &nbsp; <b>50%</b></span><span>● &nbsp; Hard: &nbsp; <b>20%</b></span></div></div></div><hr /><div className="settings-row"><div><small>BLOOM'S TAXONOMY LEVELS</small><div className="chips">{['Remember', 'Understand', 'Apply', 'Analyse', 'Evaluate', 'Create'].map((item, index) => <span className={index < 4 ? 'chip active' : 'chip'} key={item}>• {item}</span>)}</div></div><div><small>QUESTION FORMATS</small><div className="chips"><span className="chip active">Multiple Choice (MCQ)</span><span className="chip active">Short Answer</span><span className="chip">True/False</span><span className="chip">Essay Format</span></div></div></div><hr /><div className="center"><Button onClick={() => setScreen('exam')}>Generate Custom Exam Quiz</Button><small>*Grounded in 12 past examination papers &amp; board blueprints for this module.</small></div><div className="status-line">✓ &nbsp; Retrieving past-paper patterns &nbsp; → &nbsp; ◯ Generating balanced questions... &nbsp; → &nbsp; ○ Classifying by Bloom's level</div></section>
+ </Page>; }
 
-  return (
-    <section className="access-panel" aria-labelledby="access-title">
-      <div className="access-content">
-        <p className="eyebrow">FASTLEARN<span>EE</span> / STUDENT PORTAL</p>
-        <h1 id="access-title">Access Your Syllabus</h1>
-        <p className="intro">Enter your credentials to continue your custom test preparation and track historical mock metrics.</p>
+function Exam({ setScreen }) { const [selected, setSelected] = useState(1); return <Page screen="exam" setScreen={setScreen}><div className="exam-top"><b>CURRENTLY TAKING EXAMINATION &nbsp; | &nbsp; CS201: Algorithms Mock Term</b><span>◷ <strong>18:40 Remaining</strong><br />Question 3 of 15</span></div><div className="exam-layout"><section className="question lined"><small>QUESTION 03 (BLOOM LEVEL: APPLY)</small><h2>Suppose we are using a standard greedy interval partitioning method to schedule classes. What is the guaranteed optimal relationship bound if classes are ordered purely by academic level instead of start times?</h2>{['It is bound by a constant factor of O(d) where d represents the depth of the optimal partition.', 'No logical optimal bound can be guaranteed without checking the specific chronological start overlaps.', 'The scheduling matches the performance of the earliest-deadline-first heuristic perfectly.', 'The partition collapses to a single continuous sequence without optimal depth guarantees.'].map((answer, index) => <button className={selected === index ? 'answer selected' : 'answer'} onClick={() => setSelected(index)} key={answer}><b>{String.fromCharCode(65 + index)}.</b> {answer}</button>)}<a className="flag">⚑ &nbsp; Flag this question for grading review</a></section><aside className="palette"><b>EXAMINATION PALETTE</b><p>Monitor your response matrix in real-time.</p><div className="numbers">{Array.from({ length: 15 }, (_, index) => <button className={index === 2 ? 'current' : index < 2 ? 'done' : index === 6 || index === 11 ? 'flagged' : ''} key={index}>{index + 1}</button>)}</div><b>LEGEND KEY</b><p>◼ &nbsp; Answered &amp; Saved</p><p>▢ &nbsp; Flagged for Review</p><p>□ &nbsp; Unanswered / Empty</p></aside></div><div className="exam-actions"><Button kind="outline">← &nbsp; Previous</Button><Button kind="outline">Next Question &nbsp; →</Button><Button onClick={() => setScreen('evaluation')}>Submit Mock Quiz</Button></div></Page>; }
 
-        <div className="auth-tabs" role="tablist" aria-label="Account access">
-          <button className="tab is-active" type="button" role="tab" aria-selected="true">Log In</button>
-          <button className="tab" type="button" role="tab" aria-selected="false">Create Account</button>
-        </div>
+function Evaluation({ setScreen }) { return <Page screen="evaluation" setScreen={setScreen}><Title subtitle="CS201: Algorithms & Complexity Mock Midterm Review" action={<span className="pill">Syllabus Blueprint Verified</span>}>Examination Evaluation</Title><section className="evaluation-summary lined"><div><h2>Performance Analysis</h2><p>Excellent command of Dynamic Programming, but edge-case complexity bounds require targeted revision sheets.</p><b>QUESTIONS &nbsp; <strong>15 Total</strong> &nbsp;&nbsp;&nbsp; CORRECT ANSWERS &nbsp; <strong className="green-text">11 / 15</strong> &nbsp;&nbsp;&nbsp; TIME ELAPSED &nbsp; <strong>21 mins 12s</strong></b></div><Ring value={73} red /></section><div className="filters">FILTER FEEDBACK: <Badge>All (15)</Badge> <Badge tone="light">Correct (11)</Badge> <Badge tone="light">Incorrect (4)</Badge></div>{[['Define the optimal substructure property of dynamic programming as applied to the Knapsack problem.', 'The knapsack of capacity W can be solved by combining solutions to subproblems of smaller capacities.', 'CORRECT'], ['What is the runtime of Floyd-Warshall all-pairs shortest path algorithm on a graph with V vertices?', 'O(V^2) (too low)', 'INCORRECT'], ['Suppose we are using a standard greedy interval partitioning method to schedule classes. What is the guaranteed optimal relationship bound if classes are ordered by academic level instead of start times?', 'No logical optimal bound can be guaranteed without checking the specific chronological start overlaps.', 'CORRECT']].map(([question, answer, status], index) => <article className="feedback-card" key={question}><h3>Question {index + 1} <Badge tone={status === 'CORRECT' ? 'green' : 'red'}>{status}</Badge></h3><p>{question}</p><small>YOUR ANSWER:</small><b className={status === 'CORRECT' ? 'green-text' : 'red-text'}>{answer}</b><div className="explanation"><small>EXPLANATION &amp; BLUEPRINT CORRELATION</small><br />Grounded in computational state board frameworks. Subproblem optimal paths always compose the overall optimal recurrence.</div></article>)}<div className="right"><Button onClick={() => setScreen('revision')}>Generate revision sheet from my mistakes</Button></div></Page>; }
 
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">Academic email address <span>e.g. student@university.edu</span></label>
-          <div className="input-wrap">
-            <span className="field-icon" aria-hidden="true">✉</span>
-            <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          </div>
+function Diagnostics({ setScreen }) { return <Page screen="diagnostics" setScreen={setScreen}><Title subtitle="Track your syllabus mastery and board blueprint coverage in real-time." action={<span className="pill">Overall Pass Probability: 94.2%</span>}>Performance &amp; Diagnostics</Title><div className="stats-grid"><article><small>QUIZZES TAKEN</small><strong>42</strong><b>+8 this week</b></article><article><small>AVERAGE SCORE</small><strong>85%</strong><span>VERIFIED</span></article><article><small>CURRENT STREAK</small><strong>14 <small>days</small></strong><Badge tone="yellow">Active</Badge></article></div><div className="diagnostic-grid"><section className="paper-panel chart"><h2>Mock Performance History</h2><span>Graphite &amp; Red Ink Trace</span><div className="chart-line">65%　 78%　 76%　 85%　 73%　 90%　 88%　 95%</div><div className="chart-axis">Mock 1　　 Mock 2　　 Mock 3　　 Mock 4　　 Mock 5　　 Mock 6　　 Mock 7　　 Final Drill</div></section><section className="paper-panel weak"><small>PRIORITY DIAGNOSTICS</small><h2>Syllabus Weak Spots</h2>{['CS201  Dynamic Programming Edge Cases', 'BIO105  Synaptic Action Potential Potentiation', 'MATH301  Covariance & Statistical Estimators'].map((item) => <p key={item}><b>{item}</b><span>Practice this</span><i /></p>)}</section></div><div className="diagnostic-grid bottom"><section className="paper-panel taxonomy"><small>COGNITIVE DEPTH PROFILE</small><h2>Bloom's Taxonomy Performance</h2>{['Remember 92%', 'Understand 85%', 'Apply 78%', 'Analyze 64%', 'Evaluate 45%', 'Create 30%'].map((item, index) => <p key={item}>{index + 1}. {item}<i style={{ width: `${92 - index * 12}%` }} /></p>)}</section><section className="paper-panel empty-state"><span>▢</span><h2>New Syllabus Detected</h2><p>Take your first customizable adaptive quiz to start tracking detailed Bloom and topic diagnostics.</p><Button>Generate First Quiz</Button></section></div></Page>; }
 
-          <div className="password-label">
-            <label htmlFor="password">Password</label>
-            <button type="button" className="text-button" onClick={() => setSubmitted(false)}>Forgot?</button>
-          </div>
-          <div className="input-wrap">
-            <span className="field-icon" aria-hidden="true">▣</span>
-            <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} required />
-            <button className="visibility-button" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((visible) => !visible)}>
-              {showPassword ? '◉' : '◌'}
-            </button>
-          </div>
+function Revision({ setScreen }) { return <Page screen="revision" setScreen={setScreen}><div className="notice">ⓘ &nbsp; Source material has been updated since this sheet was generated <b>Regenerate now</b></div><Title subtitle="Generated from algorithmic past board papers & personal mistake profile." action={<Button kind="outline">Regenerate Sheet</Button>}>CS201 Revision Sheet: Dynamic Programming <small>v2.4 (Aug 29, 2026)</small></Title><div className="revision-layout"><article className="revision-paper lined"><h2>Core Theorem: Bellman Recurrence</h2><p>The foundational bedrock of dynamic programming lies within the partition of subproblem decisions. To guarantee an optimal overall decision path, any subproblem path must itself represent the mathematically verified local optimum.</p><div className="formula"><small>BELLMAN DYNAMIC PROGRAMMING RECURRENCE</small><b>OPT(i, w) = max( OPT(i-1, w), v_i + OPT(i-1, w - w_i) )</b><span>Where OPT(i, w) represents the optimal value of subset using first i items within total weight allowance w.</span></div><h2>Interval Partitioning vs Start Overlaps</h2><p>Grounded on Oxford computational syllabus guidelines: Ordering interval partitioning purely by non-chronological indexes destroys optimal greedy performance bounds. True optimal depth guarantees demand checking each real chronological start metric.</p></article><aside className="terms"><b>KEY TERMS &amp; BLUEPRINTS</b><p>Essential vocabulary for this syllabus.</p>{[['Optimal Substructure', 'The mathematical property where the optimal solution to an optimization problem contains optimal solutions to subproblems.'], ['Knapsack Decidability', 'Solving allocation boundaries over constrained capacities utilizing precise recurrence indices.'], ['Greedy Interval Depth', 'The minimum number of partition sets required to schedule a collection of chronological intervals.']].map(([term, description]) => <div key={term}><h3>{term}</h3><p>{description}</p></div>)}</aside></div></Page>; }
 
-          <div className="account-notice" role="status">
-            <strong>!</strong>
-            <p><b>University Account Detection</b><br />Using your .edu or academic address unlocks official course templates matched perfectly to your university's grading standards.</p>
-          </div>
+function Admin({ setScreen }) { return <Page screen="admin" setScreen={setScreen} admin><Title subtitle="Map internal course parameters, upload paper blueprints, and enforce state-board schema validity." action={<><Button kind="outline">Export Schemas</Button> <Button>Create Module +</Button></>}>Module &amp; Blueprint Administration</Title><section className="upload"><span>♧</span><b>Upload Official Board Blueprint / Syllabus PDF</b><p>Our parser will auto-extract syllabus weightings, Bloom cognitive depths, and past exam models.</p><Badge tone="light">PDF, JSON, CSV</Badge> Max 25MB per syllabus</section><section className="admin-table"><div className="table-head">CODE <span>NAME</span><span>STATUS</span><span>PAST PAPERS</span><span>VALIDATION STATUS</span><span>ACTIONS</span></div>{[['CS201', 'Algorithms & Complexity', '14 papers', 'Validated'], ['MATH301', 'Linear Algebra & Statistics', '8 papers', 'Validated'], ['BIO105', 'Molecular Physiology', '11 papers', 'Validating'], ['LIT102', 'Victorian Narrative Prose', '4 papers', 'Not Validated'], ['PHY204', 'Quantum Mechanics & Wave Theory', '19 papers', 'Mismatch Detected']].map(([code, name, papers, validation], index) => <div className="table-row" key={code}><b>{code}</b><strong>{name}</strong><Badge tone={index === 3 ? 'light' : 'green'}>{index === 3 ? 'Archived' : 'Active'}</Badge><span>{papers}</span><Badge tone={validation === 'Mismatch Detected' ? 'red' : validation === 'Validating' ? 'yellow' : validation === 'Not Validated' ? 'light' : 'green'}>{validation}</Badge><span><u>Edit</u>　<u className="red-text">Archive</u></span></div>)}</section></Page>; }
 
-          <button className="submit-button" type="submit">Sign in to Platform</button>
-          {submitted && <p className="form-message">Welcome back. Your syllabus is ready.</p>}
-        </form>
-
-        <p className="institution-link">Looking for institutional enterprise sign-in? <button type="button" className="text-button">SSO Access</button></p>
-        <p className="security-note"><span aria-hidden="true">◉</span> Secured with AES-256 state-board compliant encryption.</p>
-      </div>
-    </section>
-  );
-}
-
-function StudyPanel() {
-  return (
-    <section className="study-panel" aria-label="FastLearnee study promise">
-      <div className="paper-sheet">
-        <div className="paper-meta"><span>SUBJECT: &nbsp; Real Exam Patterns</span><span>DATE: &nbsp; 08/29/2026</span></div>
-        <div className="score-stamp">100%<br /><small>READY</small></div>
-        <BrandMark />
-        <blockquote>“Practice with <em>real exam<br />patterns</em>, not random<br />questions.”</blockquote>
-        <p className="paper-copy">We dissect official state boards, licensing bodies, and university syllabi to give you adaptive testing that mirrors your actual high-stakes day.</p>
-        <ul className="proof-points">
-          <li>No rote memorization required. Excellent.</li>
-          <li>Proven 94.2% pass-rate for first attempts</li>
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-function App() {
-  return <main className="login-shell"><StudyPanel /><LoginForm /></main>;
-}
-
+function Materials({ setScreen }) { return <Page screen="materials" setScreen={setScreen}><aside className="materials-nav"><b>ACADEMIC MODULES</b>{['CS201: Algorithms & Complexity', 'MATH301: Linear Algebra', 'BIO105: Molecular Physiology', 'LIT102: Classical Literature'].map((item, index) => <button className={index === 0 ? 'active' : ''} key={item}>{item}<Badge tone="light">{[14, 8, 21, 5][index]}</Badge></button>)}</aside><section className="materials-content"><Title subtitle="Upload official course material, PDFs, or photos of handwriting to automatically generate adaptives." action={<Button>♧ &nbsp; Upload Material</Button>}>CS201 Study Materials</Title><div className="tabs"><b>Materials</b><span>Past Papers</span><span>Scripts and Videos</span></div><section className="materials-list"><div className="table-head">RESOURCE NAME <span>PROCESSING STATUS</span><span>ACTIONS</span></div>{[['Intro_to_Computational_Complexity_LectureNotes.pdf', 'Processed'], ['Midterm_Preparation_PastQuestions_Oxford_2025.pdf', 'Analyzing this material...'], ['Draft_Revision_Syllabus_Outline.docx', 'Failed'], ['Turing_Machines_and_State_Hierarchy.pdf', 'Processed']].map(([name, status]) => <div className="material-row" key={name}><span>▣</span><strong>{name}<small>Added Aug 29, 2026</small></strong><Badge tone={status === 'Failed' ? 'red' : status.startsWith('Analyzing') ? 'dark' : 'green'}>{status}</Badge><Button kind="outline">{status === 'Failed' ? 'Retry Analysis' : 'View Sheets'}</Button><span>♧</span></div>)}</section></section></Page>; }
+function App() { const [screen, setScreen] = useState('dashboard'); const screens = { dashboard: Dashboard, quiz: Quiz, exam: Exam, evaluation: Evaluation, diagnostics: Diagnostics, revision: Revision, admin: Admin, materials: Materials }; const Screen = screens[screen]; return <Screen setScreen={setScreen} />; }
 createRoot(document.getElementById('root')).render(<StrictMode><App /></StrictMode>);
